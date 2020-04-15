@@ -1,0 +1,15 @@
+{
+  "name": "orion-subscriber",
+  "version": "0.0.1",
+  "description": "Subscribe fiware orion and record data to elasticsearch.",
+  "main": "server.js",
+  "repository": "https://github.com/napat1412/orion-subscriber",
+  "author": "Napat <napat.chu@gmail.com>",
+  "license": "BSD",
+  "dependencies": {
+    "@elastic/elasticsearch": "^7.6.1",
+    "express": "^4.17.1",
+    "express-ipfilter": "^1.1.2",
+    "winston": "^3.2.1"
+  }
+}

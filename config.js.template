@@ -1,0 +1,26 @@
+const config = {};
+
+function to_boolean(env, default_value){
+    return (env !== undefined) ? (env.toLowerCase() === 'true') : default_value;
+}
+
+function to_array(env, default_value){
+    return (env !== undefined) ? env.split(',') : default_value;
+}
+
+// LOG_LEVEL list: [error, warn, info, http, verbose, debug, silly]  
+config.loglevel = (process.env.LOG_LEVEL || 'silly');
+config.loglevel = (process.env.LOG_LEVEL || 'info');
+
+config.es_user = (process.env.ES_USER || 'bot');
+config.es_pass = (process.env.ES_PASS || 'botbot');
+config.es_header_key = (process.env.ES_HEADER_KEY);
+config.es_header_value = (process.env.ES_HEADER_VALUE);
+config.es_nodes = to_array(process.env.ES_NODES, ['https://opendistro.meca.in.th:9200']);
+config.port = (process.env.ORION_SUBSCRIBER_PORT || 8081 );
+//config.orion_whitelist = to_array(process.env.ORION_WHITELIST, ['::ffff:203.185.0.0/112', '::ffff:127.0.0.1/128'] );
+config.orion_whitelist = to_array(process.env.ORION_WHITELIST, ['::/0'] );
+
+//console.log("config: "+JSON.stringify(config, null, 2))
+
+module.exports = config;
