@@ -21,17 +21,17 @@ esconfig = {
   }*/
 }
 
-esconfig['nodes'] = config.es_nodes
-if (config.es_user !== undefined && config.es_pass !== undefined) {
+esconfig['nodes'] = config.es.nodes
+if (config.es.user !== undefined && config.es.pass !== undefined) {
   esconfig['auth'] = {}
-  esconfig['auth']['username'] = config.es_user
-  esconfig['auth']['password'] = config.es_pass
+  esconfig['auth']['username'] = config.es.user
+  esconfig['auth']['password'] = config.es.pass
 }
-if (config.es_header_key !== undefined && config.es_header_value !== undefined) {
-  esconfig['headers'][config.es_header_key] =  config.es_header_value
+if (config.es.header_key !== undefined && config.es.header_value !== undefined) {
+  esconfig['headers'][config.es.header_key] =  config.es.header_value
 }
 
-logger.debug('ELASTICSEARCH CONFIG: '+JSON.stringify(esconfig))
+//logger.debug('ELASTICSEARCH CONFIG: '+JSON.stringify(esconfig))
 //console.log('esnodes '+ config.es_nodes)
 //console.log('esnodes '+ typeof config.es_nodes)
 

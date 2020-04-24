@@ -3,21 +3,26 @@ var http = require('http');
 var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
-const ipfilter = require('express-ipfilter').IpFilter;
 
-const logger = require('./logger');
-const router = require('./router');
 const config = require('./config');
- 
+
 var app = express();
 app.use(bodyParser.text({
   type: function(req) {
     return 'text';
   }
 }));
-app.use(ipfilter(config.orion_verification.whitelist, { mode: 'allow' , log: false}))
 
-app.use('*', router)
+app.all('*', function (req, res) {
+  console.log(req.body);
+  res = res.status(200);
+  if (req.get('Content-Type')) {
+    console.log("Content-Type: " + req.get('Content-Type'));
+    res = res.type(req.get('Content-Type'));
+  }
+  res.send(req.body);
+});
+
 
 
 let server
@@ -32,7 +37,7 @@ if (config.os.https.enabled) {
           options.ca.push(fs.readFileSync(config.os.https.ca_certs[ca]).toString());
       }
   }
-  logger.silly("HTTPS configuration: " + JSON.stringify(options, null, 2))
+  console.log(options)
 
   server = https.createServer(options, app);
 }
@@ -41,8 +46,7 @@ else {
 }
 
 server.listen(config.os.port, function () {
-  logger.info("Log Level " + config.loglevel)
-  logger.debug("Configuration: " + JSON.stringify(config, null, 2))
-  logger.info("Listening on port %d", server.address().port)
+  console.log("Log Level " + config.loglevel)
+  console.log("Listening on port %d", server.address().port)
 });
 

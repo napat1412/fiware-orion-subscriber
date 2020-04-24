@@ -12,14 +12,63 @@ function to_array(env, default_value){
 config.loglevel = (process.env.LOG_LEVEL || 'silly');
 config.loglevel = (process.env.LOG_LEVEL || 'info');
 
-config.es_user = (process.env.ES_USER || 'bot');
-config.es_pass = (process.env.ES_PASS || 'botbot');
-config.es_header_key = (process.env.ES_HEADER_KEY);
-config.es_header_value = (process.env.ES_HEADER_VALUE);
-config.es_nodes = to_array(process.env.ES_NODES, ['https://opendistro.meca.in.th:9200']);
-config.port = (process.env.ORION_SUBSCRIBER_PORT || 8081 );
-//config.orion_whitelist = to_array(process.env.ORION_WHITELIST, ['::ffff:203.185.0.0/112', '::ffff:127.0.0.1/128'] );
-config.orion_whitelist = to_array(process.env.ORION_WHITELIST, ['::/0'] );
+
+// HTTP or HTTPS server configuration for Orion Subscriber
+config.os = {
+  https: {
+    enabled: to_boolean(process.env.OS_HTTPS_ENABLED, true),
+    cert_file: ( process.env.OS_HTTPS_CERT_FILE || './pki/orionsubscriber-cert.pem'),
+    key_file: ( process.env.OS_HTTPS_KEY_FILE || './pki/orionsubscriber-key.pem'),
+    ca_certs: to_array( process.env.OS_HTTPS_CA_CERTS, []),
+  },
+  port: (process.env.OS_PORT || 8443 )
+};
+/* HTTPS server configuration with Let's Encrypt Certificate: OPTION 1
+config.os = {
+  https: {
+    enabled: to_boolean(process.env.OS_HTTPS_ENABLED, true),
+    cert_file: ( process.env.OS_HTTPS_CERT_FILE || './certbot/live/${DOMAIN}/cert.pem'),
+    key_file: ( process.env.OS_HTTPS_KEY_FILE || './certbot/live/${DOMAIN}/privkey.pem'),
+    ca_certs: to_array( process.env.OS_HTTPS_CA_CERTS, ['./certbot/live/${DOMAIN}/chain.pem']),
+  },
+  port: (process.env.OS_PORT || 8443 )
+};
+*/
+/* HTTPS server configuration with Let's Encrypt Certificate: OPTION 2
+config.os = {
+  https: {
+    enabled: to_boolean(process.env.OS_HTTPS_ENABLED, true),
+    cert_file: ( process.env.OS_HTTPS_CERT_FILE || './certbot/live/${DOMAIN}/fullchain.pem'),
+    key_file: ( process.env.OS_HTTPS_KEY_FILE || './certbot/live/${DOMAIN}/privkey.pem'),
+    ca_certs: to_array( process.env.OS_HTTPS_CA_CERTS, []),
+  },
+  port: (process.env.OS_PORT || 8443 )
+};
+*/
+
+
+// DB: Elasticsearch configuration
+config.es = {
+  user: (process.env.ES_USER || 'admin'),
+  pass: (process.env.ES_PASS || 'admin'),
+  header_key: (process.env.ES_HEADER_KEY),
+  header_value: (process.env.ES_HEADER_VALUE),
+  nodes: to_array(process.env.ES_NODES, ['http://localhost:9200'])
+}
+
+// Orion Token Verification (verify oauth2 access token with keyrock server)
+config.orion_verification = {
+  whitelist: to_array(process.env.ORION_VERIFICATION_WHITELIST, ['::/0'] ),
+  enabled: to_boolean(process.env.ORION_VERIFICATION_ENABLED, true),
+  keyrock_endpoint: (process.env.ORION_VERIFICATION_KEYROCK_ENDPOINT || "https://idm.smart-city.web.meca.in.th"),
+  keyrock_endpoint_verification: to_boolean(process.env.ORION_VERIFICATION_KEYROCK_ENDPOINT_VERIFICATION, false),
+  authorization_key: (process.env.ORION_VERIFICATION_AUTHORIZATION_KEY || "Authorization"),
+  authorization_prefix_value: (process.env.ORION_VERIFICATION_AUTHORIZATION_PREFIX_VALUE || "Bearer"),
+  client_verification: {
+    enabled: to_boolean(process.env.ORION_VERIFICATION_CLIENT_ENABLED, true),
+    client_ids:  to_array(process.env.ORION_VERIFICATION_CLIENT_IDS, ['adf704e9-fb6f-4890-b734-b32f94b861f1'] )
+  }
+};
 
 //console.log("config: "+JSON.stringify(config, null, 2))
 
