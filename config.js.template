@@ -60,7 +60,7 @@ config.es = {
 config.orion_verification = {
   whitelist: to_array(process.env.ORION_VERIFICATION_WHITELIST, ['::/0'] ),
   enabled: to_boolean(process.env.ORION_VERIFICATION_ENABLED, true),
-  keyrock_endpoint: (process.env.ORION_VERIFICATION_KEYROCK_ENDPOINT || "https://idm.smart-city.web.meca.in.th"),
+  keyrock_endpoint: (process.env.ORION_VERIFICATION_KEYROCK_ENDPOINT || "https://keyrock"),
   keyrock_endpoint_verification: to_boolean(process.env.ORION_VERIFICATION_KEYROCK_ENDPOINT_VERIFICATION, false),
   authorization_key: (process.env.ORION_VERIFICATION_AUTHORIZATION_KEY || "Authorization"),
   authorization_prefix_value: (process.env.ORION_VERIFICATION_AUTHORIZATION_PREFIX_VALUE || "Bearer"),

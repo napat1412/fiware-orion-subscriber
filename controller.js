@@ -29,10 +29,12 @@ function get_uri(uri,https_verification) {
 function process_ngsi(req) {
   let data = []
   let path = ""
+  let index
   let path_list = req.originalUrl.split( '/' ).filter(f => f != '');
 
   if (path_list.length <= 2 && path_list.length > 0) {
      path = "/"+path_list[0]+"/_doc"
+     index = path_list[0]
   }
   else {
     logger.error("Request IP address: " + req.connection.remoteAddress);
@@ -61,9 +63,11 @@ function process_ngsi(req) {
       fiware_service: req.headers['fiware-service'],
       fiware_servicepath: req.headers['fiware-servicepath'],
     }
-
+    
+    // ### Client use path format /<index>/<type> 
+    // ### which specify type of data
     if (path_list.length == 2) {
-      record['type'] = path_list[1]
+      record["type"] =  path_list[1]
     }
 
     entity.contextElement.attributes.forEach( attribute => {
@@ -71,24 +75,53 @@ function process_ngsi(req) {
       if (! isNaN(Number(value))) {
         value = Number(value)
       }
-      record[attribute.name.replace(/\s+/, "")] = value
-
+      
+      // ### You can tranform NGSI by type to appropriate format ###
+      // ### Tranform NGSI type = geo:json to coordinates format
+      if (attribute.type=="geo:json") {     
+        let key = "geo_".concat(attribute.name.replace(/\s+/, ""))
+        record[key] = attribute['value']['coordinates']
+      } else {
+        record[attribute.name.replace(/\s+/, "")] = value
+      }
     });
-
-    //### overwrite Field: location ###
-    if (record['location'] !== undefined) {
-      //console.log('location: ')
-      //console.log(JSON.stringify(data['location']))
-      record['location'] = record['location']['coordinates']
-      //console.log(JSON.stringify(data))
-    }
-
-    record['timestamp'] = new Date(new Date().toUTCString())
-
+    
     data.push(record)
   });
-  es_data(path_list[0], data)
+
+  process_record(index, data)
   return true;
+}
+
+function process_record(index, data) {
+  let timestamp = new Date(new Date().toUTCString())
+  let date = timestamp.toISOString().split('T')[0]
+  date = date.replace(/-/g, ".")
+  if (index == 'nstda-track-feed') {
+    data.forEach( record => {
+      //record['timestamp'] = record['gps_timestamp'];
+      delete record['log_timestamp']
+      delete record['server_timestamp']
+      //delete record['gps_timestamp']
+      //delete record['timestamp']
+    })
+    //### Overwrite index name ###
+    //index = index+'-'+date
+    index = "nstda-track"
+    
+    es_data(index, data)
+  }
+  /*else if (index == 'smartcity-nectecgreen') {
+    data.forEach( record => {
+      delete record['dateObserved']
+    })
+  }*/
+  else {
+    data.forEach( record => {
+      record['timestamp'] = timestamp;
+    })
+    es_data(index, data)
+  }
 }
 
 function es_data(index, data) {
@@ -135,25 +168,24 @@ async function es_bulk(index, data) {
 
 async function es_index(index, record) {
   // Let's start by indexing some data
-  await esclient.index({
-    index: index,
-    // type: '_doc', // uncomment this line if you are using Elasticsearch ≤ 6
-    body: record
-  }, (err, result) => {
-    if (err) {
-      logger.error('index = '+index);
-      logger.error('method = client.index()')
-      logger.error('data = '+JSON.stringify(record));
-      logger.error(JSON.stringify(err))
-    }
-    logger.debug(JSON.stringify(result))
-  })
+  try {
+    await esclient.index({
+      index: index,
+      // type: '_doc', // uncomment this line if you are using Elasticsearch ≤ 6
+      body: record
+    })
+  } catch (err) {    
+    logger.error('index = '+index);
+    logger.error('method = client.index()')
+    logger.error('data = '+JSON.stringify(record));
+    //logger.error(JSON.stringify(err))
+    console.log(err)
+  }
 }
 
 /* Process Orion has function to tranform NGSI data to save to Elasticsearch.
    If the request has multiple record, this function use Elasticsearch bulk api to save data.
 */
-
 exports.process_orion = function(req, res, next) {
   logger.debug('----- process_orion ')
   logger.debug('Process data from Orion IP address: '+ req.ip);

@@ -3,7 +3,7 @@ const config = require('./config')
 const logger = require('./logger')
 
 esconfig = {
-  //node: 'https://opendistro.meca.in.th:9200',
+  //node: 'https://localhost:9200',
   // # Headers: JWT TOKEN
   //headers: { 'X-Token-Auth': <JWT_TOKEN> },
   // # Headers: Basic Authentication
@@ -13,7 +13,6 @@ esconfig = {
 
   maxRetries: 0,
   requestTimeout: 60000,
-  sniffOnStart: true,
 
   /*ssl: {
     //ca: fs.readFileSync('./cacert.pem'),
