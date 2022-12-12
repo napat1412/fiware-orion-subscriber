@@ -9,7 +9,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^7.9.1",
     "async-lock": "^1.2.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-ipfilter": "^1.1.2",
     "node-cache": "^5.1.0",
     "request": "^2.88.2",
